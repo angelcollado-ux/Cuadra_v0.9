@@ -1,14 +1,14 @@
-#Proyecto IU Entrega 03
+Proyecto IU Entrega 03
 
 Página web de administración de finanzas personales
 
-##Tecnologías utilizadas
+Tecnologías utilizadas
 
 -HTML
 -CSS
 -JS
 
-##Colaboradores y Roles: 
+Colaboradores y Roles: 
 
 -Manuel Tornel - Docente 
 -Angel Collado - Lider / Frontend 
