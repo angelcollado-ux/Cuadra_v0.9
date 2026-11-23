@@ -19,18 +19,25 @@ function escribirStorage(clave, valor) {
   }
 }
 
-//Generacion de sal (dato aleatorio) y Hasheo de la clave
-function generarSal() {
-  const bytes = new Uint8Array(8);
-  if (window.crypto && crypto.getRandomValues) {
-    crypto.getRandomValues(bytes);
-  } else {
-    for (let i = 0; i < bytes.length; i++) bytes[i] = Math.floor(Math.random() * 256);
-  }
-  return Array.from(bytes).map(b => b.toString(16).padStart(2, "0")).join("");
+// generacion de hasheo y aleatorio
+const COSTO_BCRYPT = 10;
+
+function obtenerBcrypt() {
+  const lib = (window.dcodeIO && window.dcodeIO.bcrypt) || window.bcrypt;
+  if (!lib) throw new Error("No se pudo cargar bcrypt. Revisa tu conexión a internet.");
+  return lib;
 }
 
-async function hashClave(clave, sal) {
+function hashClave(clave) {
+  return obtenerBcrypt().hash(clave, COSTO_BCRYPT);
+}
+
+function verificarClave(clave, hash) {
+  return obtenerBcrypt().compare(clave, hash);
+}
+
+// cuentas antiguas (SHA-256 + sal): se verifican asi y se migran a bcrypt al iniciar sesion
+async function hashClaveLegacy(clave, sal) {
   const texto = sal + ":" + clave;
 
   if (window.crypto && crypto.subtle) {
@@ -39,7 +46,7 @@ async function hashClave(clave, sal) {
     return Array.from(new Uint8Array(buffer)).map(b => b.toString(16).padStart(2, "0")).join("");
   }
 
-  //Respaldo simple por si el navegador no tiene crypto.subtle
+  // respaldo simple por si el navegador no tiene crypto.subtle
   let h = 5381;
   for (let i = 0; i < texto.length; i++) h = ((h << 5) + h + texto.charCodeAt(i)) | 0;
   return "x" + (h >>> 0).toString(16);
@@ -49,8 +56,16 @@ function normalizarUsuario(usuario) {
   return String(usuario).trim().toLowerCase();
 }
 
-async function registrarUsuario(usuario, clave) {
+async function registrarUsuario(usuario, clave, alias, comuna) {
   const nombre = normalizarUsuario(usuario);
+  alias = String(alias || "").trim();
+
+  if (alias.length < 2 || alias.length > 30) {
+    return { ok: false, mensaje: "Escribe tu alias (entre 2 y 30 caracteres)." };
+  }
+  if (!comuna) {
+    return { ok: false, mensaje: "Selecciona la comuna donde vives." };
+  }
 
   if (!/^[a-z0-9._-]{3,20}$/.test(nombre)) {
     return { ok: false, mensaje: "El usuario debe tener entre 3 y 20 caracteres: letras, números, punto, guion o guion bajo." };
@@ -62,10 +77,14 @@ async function registrarUsuario(usuario, clave) {
     return { ok: false, mensaje: "Ese usuario ya existe. Elige otro o inicia sesión." };
   }
 
-  const sal  = generarSal();
-  const hash = await hashClave(clave, sal);
+  let hash;
+  try {
+    hash = await hashClave(clave);
+  } catch (error) {
+    return { ok: false, mensaje: error.message };
+  }
 
-  if (!escribirStorage(PREFIJO + "user_" + nombre, { sal, hash })) {
+  if (!escribirStorage(PREFIJO + "user_" + nombre, { hash, alias, comuna })) {
     return { ok: false, mensaje: "No se pudo guardar la cuenta. Revisa que tu navegador permita guardar datos." };
   }
 
@@ -80,8 +99,19 @@ async function iniciarSesion(usuario, clave) {
 
   if (!cuenta) return errorGenerico;
 
-  const hash = await hashClave(clave, cuenta.sal);
-  if (hash !== cuenta.hash) return errorGenerico;
+  try {
+    if (cuenta.sal) {
+      const hashViejo = await hashClaveLegacy(clave, cuenta.sal);
+      if (hashViejo !== cuenta.hash) return errorGenerico;
+
+      const { sal, ...resto } = cuenta;
+      escribirStorage(PREFIJO + "user_" + nombre, { ...resto, hash: await hashClave(clave) });
+    } else {
+      if (!(await verificarClave(clave, cuenta.hash))) return errorGenerico;
+    }
+  } catch (error) {
+    return { ok: false, mensaje: error.message };
+  }
 
   escribirStorage(CLAVE_SESION, nombre);
   return { ok: true };
@@ -91,24 +121,49 @@ function usuarioActual() {
   return leerStorage(CLAVE_SESION);
 }
 
+// alias(usu) y comuna de la cuenta 
+function perfilActual() {
+  const usuario = usuarioActual();
+  if (!usuario) return null;
+  const cuenta = leerStorage(PREFIJO + "user_" + usuario) || {};
+  return { usuario, alias: cuenta.alias || usuario, comuna: cuenta.comuna || "" };
+}
+
 function cerrarSesion() {
   try { localStorage.removeItem(CLAVE_SESION); } catch (error) {}
   location.href = "login.html";
 }
 
+function hoyISO() {
+  const d = new Date();
+  return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0");
+}
+
 function cargarDatos() {
   const usuario = usuarioActual();
-  const vacio = { sueldoFijo: 0, sueldoExtra: 0, gastos: [], cuotas: [] };
+  const vacio = { ingresos: [], gastos: [], cuotas: [], presupuestos: {} };
   if (!usuario) return vacio;
 
-  const guardado = leerStorage(PREFIJO + "datos_" + usuario);
-  if (!guardado) return vacio;
+  const g = leerStorage(PREFIJO + "datos_" + usuario);
+  if (!g) return vacio;
+
+  const hoy = hoyISO();
+  const limpiar = (lista, catDef) => (Array.isArray(lista) ? lista : []).map(m => ({
+    nombre: m.nombre, monto: Number(m.monto) || 0,
+    categoria: m.categoria || catDef, fecha: m.fecha || hoy, descripcion: m.descripcion || "",
+  }));
+
+  let ingresos = limpiar(g.ingresos, "Otro");
+  if (!Array.isArray(g.ingresos)) {
+    if (Number(g.sueldoFijo) > 0)  ingresos.push({ nombre: "Sueldo fijo",  monto: Number(g.sueldoFijo),  categoria: "Sueldo",       fecha: hoy, descripcion: "" });
+    if (Number(g.sueldoExtra) > 0) ingresos.push({ nombre: "Sueldo extra", monto: Number(g.sueldoExtra), categoria: "Sueldo extra", fecha: hoy, descripcion: "" });
+  }
 
   return {
-    sueldoFijo:  Number(guardado.sueldoFijo)  || 0,
-    sueldoExtra: Number(guardado.sueldoExtra) || 0,
-    gastos: Array.isArray(guardado.gastos) ? guardado.gastos : [],
-    cuotas: Array.isArray(guardado.cuotas) ? guardado.cuotas : [],
+    ingresos,
+    gastos: limpiar(g.gastos, "Otros"),
+    cuotas: Array.isArray(g.cuotas) ? g.cuotas : [],
+    presupuestos: (g.presupuestos && typeof g.presupuestos === "object") ? g.presupuestos : {},
   };
 }
 
