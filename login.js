@@ -45,6 +45,8 @@ formRegistro.addEventListener("submit", async (evento) => {
   const usuario = document.getElementById("regUsuario").value;
   const clave   = document.getElementById("regClave").value;
   const clave2  = document.getElementById("regClave2").value;
+  const alias   = document.getElementById("regAlias").value;
+  const comuna  = document.getElementById("regComuna").value;
 
   if (clave !== clave2) {
     mostrarError(msgRegistro, "Las contraseñas no coinciden.");
