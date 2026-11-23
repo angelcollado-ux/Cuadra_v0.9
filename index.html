@@ -14,29 +14,9 @@
 </head>
 <body>
 
-<!--Menú (arreglarrrrr)-->
-  <nav class="navbar navbar-expand-md navbar-dark border-bottom border-dark-subtle">
-    <div class="container">
-      <a class="navbar-brand fw-semibold" href="index.html">Calcula tu sueldo</a>
-      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#menu"
-              aria-controls="menu" aria-expanded="false" aria-label="Abrir menú">
-        <span class="navbar-toggler-icon"></span>
-      </button>
-      <div class="collapse navbar-collapse" id="menu">
-        <ul class="navbar-nav ms-auto">
-          <li class="nav-item"><a class="nav-link active" href="index.html">Inicio</a></li>
-          <li class="nav-item"><a class="nav-link" href="#">Registrar ingreso/gasto</a></li>
-          <li class="nav-item"><a class="nav-link" href="#">Gráficos</a></li>
-          <li class="nav-item"><a class="nav-link" href="#consejos">Consejos financieros</a></li>
-        </ul>
-        <div class="d-flex align-items-center gap-2 ms-md-3 mt-2 mt-md-0">
-          <span class="small text-secondary"><i class="bi bi-person-circle me-1"></i><span id="nombreUsuario"></span></span>
-          <button type="button" id="btnSalir" class="btn btn-agregar">Cerrar sesión</button>
-        </div>
-      </div>
-    </div>
-  </nav>
-
+  <!-- LLamado a nav.js -->
+  <div id="navbar" data-activa="inicio"></div>
+  
   <main class="container py-4" style="max-width: 760px;">
 
 <!--Título-->
@@ -212,6 +192,7 @@
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="nav.js"></script>
   <script src="consejos.js"></script>
   <script src="app.js"></script>
 </body>
