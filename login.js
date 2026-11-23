@@ -53,7 +53,7 @@ formRegistro.addEventListener("submit", async (evento) => {
     return;
   }
 
-  const resultado = await registrarUsuario(usuario, clave);
+  const resultado = await registrarUsuario(usuario, clave, alias, comuna);
   if (resultado.ok) {
     location.href = "index.html";
   } else {
