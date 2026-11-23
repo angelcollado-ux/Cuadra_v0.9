@@ -19,7 +19,7 @@
   cont.innerHTML =
     '<nav class="navbar navbar-expand-md navbar-dark border-bottom border-dark-subtle">' +
       '<div class="container">' +
-        '<a class="navbar-brand fw-semibold" href="index.html">Calcula tu sueldo</a>' +
+        '<a class="navbar-brand fw-semibold" href="index.html">CUADRA</a>' +
         '<button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#menu" aria-controls="menu" aria-expanded="false" aria-label="Abrir menú"><span class="navbar-toggler-icon"></span></button>' +
         '<div class="collapse navbar-collapse" id="menu">' +
           '<ul class="navbar-nav ms-auto">' + items + '</ul>' +

@@ -3,84 +3,29 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Calcula tu sueldo</title>
+  <title>CUADRA</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
   <link href="style.css" rel="stylesheet">
 
-<!--Si no hay sesión iniciada, volver al login-->
+<!--Si no hay sesion iniciada, volver al login-->
   <script src="auth.js"></script>
   <script>if (!usuarioActual()) location.replace("login.html");</script>
 </head>
 <body>
 
-  <!-- LLamado a nav.js -->
-  <div id="navbar" data-activa="inicio"></div>
-  
-  <main class="container py-4" style="max-width: 760px;">
+<div id="navbar" data-activa="inicio"></div>
 
-<!--Título-->
+  <main class="container py-4">
+
+    <!-- Título -->
     <div class="d-flex justify-content-between align-items-center mb-3">
       <h1 class="h5 mb-0"><i class="bi bi-wallet2 me-2"></i>Mis gastos del mes</h1>
-      <span class="text-secondary small" id="mesActual"></span>
+      <input type="month" id="mesSel" class="form-control form-control-sm w-auto" aria-label="Mes a consultar">
     </div>
 
-<!--Ingresos y gastos fijos-->
+    <!-- Totales (a todo el ancho) -->
     <div class="row g-3 mb-3">
-
-<!--INGRESOS-->
-      <div class="col-md-5">
-        <section class="panel h-100">
-          <h2 class="panel-title"><i class="bi bi-cash-stack me-2"></i>Ingresos</h2>
-
-          <label for="sueldoFijo" class="form-label small text-secondary mb-1">Sueldo mensual fijo</label>
-          <div class="input-group mb-3">
-            <span class="input-group-text">$</span>
-            <input type="text" id="sueldoFijo" class="form-control" placeholder="0">
-          </div>
-
-          <div class="d-flex justify-content-between align-items-center mb-1">
-            <label for="sueldoExtra" class="form-label small text-secondary mb-0">Sueldo extra (opcional)</label>
-            <span class="badge badge-azul">Activado</span>
-          </div>
-          <div class="input-group">
-            <span class="input-group-text">$</span>
-            <input type="text" id="sueldoExtra" class="form-control" placeholder="0">
-          </div>
-        </section>
-      </div>
-
-<!--GASTOS FIJOS-->
-      <div class="col-md-7">
-        <section class="panel h-100">
-          <h2 class="panel-title"><i class="bi bi-house me-2"></i>Gastos fijos</h2>
-
-          <!-- Esta lista la llena app.js -->
-          <ul id="listaGastos" class="list-unstyled lista-gastos mb-3"></ul>
-
-          <button type="button" class="btn btn-agregar w-100"
-                  data-bs-toggle="modal" data-bs-target="#modalGasto">
-            <i class="bi bi-plus-lg me-1"></i>Agregar gasto
-          </button>
-        </section>
-      </div>
-    </div>
-
-<!--Compras en cuotas-->
-    <section class="panel mb-3">
-      <h2 class="panel-title"><i class="bi bi-credit-card me-2"></i>Compras en cuotas</h2>
-
-      <!-- Esta lista la llena app.js -->
-      <div id="listaCuotas"></div>
-
-      <button type="button" class="btn btn-agregar w-100 mt-3"
-              data-bs-toggle="modal" data-bs-target="#modalCuota">
-        <i class="bi bi-plus-lg me-1"></i>Agregar compra en cuotas
-      </button>
-    </section>
-
-<!--Totales-->
-    <div class="row g-3">
       <div class="col-6 col-md-4">
         <div class="panel total">
           <div class="small text-secondary">Total ingresos</div>
@@ -101,45 +46,144 @@
       </div>
     </div>
 
-<!--Aviso si el sueldo no alcanza-->
-    <div id="aviso" class="aviso d-none mt-3" role="alert"></div>
+    <!-- Aviso si el sueldo no alcanza -->
+    <div id="aviso" class="aviso d-none mb-3" role="alert"></div>
 
-    <!-- Consejos personalizados (los llena app.js usando consejos.js) -->
-    <section id="consejos" class="panel mt-3 d-none">
-      <h2 class="panel-title"><i class="bi bi-stars me-2"></i>Consejos para tu bolsillo</h2>
-      <div id="listaConsejos"></div>
-      <p class="small text-secondary mb-0 mt-3">Son estimaciones según los datos que ingresaste. Se actualizan solos cuando cambias algo.</p>
+    <!-- Panel: datos a la izquierda, gráficos a la derecha (en pantallas chicas se apila) -->
+    <div class="row g-3 g-lg-4">
+
+      <!-- Columna de datos -->
+      <div class="col-12">
+        <div class="row g-3">
+          <!-- Ingresos -->
+          <div class="col-md-6">
+            <section class="panel h-100">
+              <h2 class="panel-title"><i class="bi bi-cash-stack me-2"></i>Ingresos</h2>
+              <ul id="listaIngresos" class="list-unstyled lista-gastos mb-3"></ul>
+              <button type="button" id="btnAddIngreso" class="btn btn-agregar w-100">
+                <i class="bi bi-plus-lg me-1"></i>Agregar ingreso
+              </button>
+            </section>
+          </div>
+          <!-- Gastos fijos -->
+          <div class="col-md-6">
+            <section class="panel h-100">
+              <h2 class="panel-title"><i class="bi bi-house me-2"></i>Gastos</h2>
+
+              <!-- Esta lista la llena app.js -->
+              <ul id="listaGastos" class="list-unstyled lista-gastos mb-3"></ul>
+
+              <button type="button" id="btnAddGasto" class="btn btn-agregar w-100">
+                <i class="bi bi-plus-lg me-1"></i>Agregar gasto
+              </button>
+            </section>
+          </div>
+          <!-- Compras en cuotas -->
+          <div class="col-12">
+            <section class="panel">
+              <h2 class="panel-title"><i class="bi bi-credit-card me-2"></i>Compras en cuotas</h2>
+
+              <!-- Esta lista la llena app.js -->
+              <div id="listaCuotas"></div>
+
+              <button type="button" class="btn btn-agregar w-100 mt-3"
+                      data-bs-toggle="modal" data-bs-target="#modalCuota">
+                <i class="bi bi-plus-lg me-1"></i>Agregar compra en cuotas
+              </button>
+            </section>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Presupuestos por categorIA RF3 -->
+    <section id="presupuestos" class="panel mt-3 mt-lg-4">
+      <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+        <h2 class="panel-title mb-0"><i class="bi bi-bullseye me-2"></i>Presupuesto mensual por categoría</h2>
+        <button type="button" id="btnAddPres" class="btn btn-agregar"><i class="bi bi-plus-lg me-1"></i>Definir presupuesto</button>
+      </div>
+      <div id="listaPres"></div>
+      <p class="small text-secondary mb-0 mt-3">Se compara con los gastos del mes seleccionado.</p>
     </section>
+
 
   </main>
 
-  <!-- Ventana para agregar un gasto fijo -->
-  <div class="modal fade" id="modalGasto" tabindex="-1" aria-labelledby="tituloModalGasto" aria-hidden="true">
+  <!-- Ventana para agregar o editar un ingreso/gasto -->
+  <div class="modal fade" id="modalMov" tabindex="-1" aria-labelledby="tituloModalMov" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
       <div class="modal-content">
-        <form id="formGasto" novalidate>
+        <form id="formMov" novalidate>
           <div class="modal-header">
-            <h2 class="modal-title fs-6" id="tituloModalGasto">Agregar gasto fijo</h2>
+            <h2 class="modal-title fs-6" id="tituloModalMov"></h2>
             <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
           </div>
           <div class="modal-body">
             <div class="mb-3">
-              <label for="gastoNombre" class="form-label small text-secondary">Nombre del gasto</label>
-              <input type="text" id="gastoNombre" class="form-control" placeholder="Ej: Gas" maxlength="30" required>
+              <label for="movNombre" class="form-label small text-secondary">Nombre</label>
+              <input type="text" id="movNombre" class="form-control" placeholder="Ej: Arriendo" maxlength="30" required>
               <div class="invalid-feedback">Escribe un nombre.</div>
             </div>
-            <div>
-              <label for="gastoMonto" class="form-label small text-secondary">Monto mensual</label>
+            <div class="mb-3">
+              <label for="movMonto" class="form-label small text-secondary">Monto</label>
               <div class="input-group has-validation">
                 <span class="input-group-text">$</span>
-                <input type="text" id="gastoMonto" class="form-control" placeholder="25.000" inputmode="numeric" required>
+                <input type="text" id="movMonto" class="form-control" placeholder="25.000" inputmode="numeric" required>
+                <div class="invalid-feedback">Ingresa un monto mayor a 0.</div>
+              </div>
+            </div>
+            <div class="row g-3 mb-3">
+              <div class="col-6">
+                <label for="movFecha" class="form-label small text-secondary">Fecha</label>
+                <input type="date" id="movFecha" class="form-control" required>
+                <div class="invalid-feedback">Elige una fecha.</div>
+              </div>
+              <div class="col-6">
+                <label for="movCategoria" class="form-label small text-secondary">Categoría</label>
+                <select id="movCategoria" class="form-select form-control" required></select>
+              </div>
+            </div>
+            <div>
+              <label for="movDescripcion" class="form-label small text-secondary">Descripción (opcional)</label>
+              <input type="text" id="movDescripcion" class="form-control" maxlength="80" placeholder="Detalle del movimiento">
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-agregar" data-bs-dismiss="modal">Cancelar</button>
+            <button type="submit" class="btn btn-primary">Guardar</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Ventana para definir un presupuesto -->
+  <div class="modal fade" id="modalPres" tabindex="-1" aria-labelledby="tituloModalPres" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <form id="formPres" novalidate>
+          <div class="modal-header">
+            <h2 class="modal-title fs-6" id="tituloModalPres">Presupuesto mensual</h2>
+            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+          </div>
+          <div class="modal-body">
+            <div class="mb-3">
+              <label for="presCategoria" class="form-label small text-secondary">Categoría</label>
+              <select id="presCategoria" class="form-select form-control"></select>
+            </div>
+            <div>
+              <label for="presMonto" class="form-label small text-secondary">Presupuesto del mes</label>
+              <div class="input-group has-validation">
+                <span class="input-group-text">$</span>
+                <input type="text" id="presMonto" class="form-control" placeholder="150.000" inputmode="numeric" required>
                 <div class="invalid-feedback">Ingresa un monto mayor a 0.</div>
               </div>
             </div>
           </div>
           <div class="modal-footer">
             <button type="button" class="btn btn-agregar" data-bs-dismiss="modal">Cancelar</button>
-            <button type="submit" class="btn btn-primary">Guardar gasto</button>
+            <button type="submit" class="btn btn-primary">Guardar presupuesto</button>
           </div>
         </form>
       </div>
@@ -191,9 +235,53 @@
     </div>
   </div>
 
+   <!-- Respaldo de datos (JSON) -->
+    <section id="respaldo" class="panel mt-3 mt-lg-4">
+      <h2 class="panel-title"><i class="bi bi-cloud-arrow-down me-2"></i>Respaldo de tus datos</h2>
+      <p class="small text-secondary">
+        Descarga un archivo JSON con tus ingresos, gastos, cuotas y presupuestos, o restaura uno que hayas guardado antes.
+        El respaldo no incluye tu contraseña.
+      </p>
+      <div class="d-flex flex-wrap gap-2">
+        <button type="button" id="btnExportarRespaldo" class="btn btn-agregar px-3"><i class="bi bi-download me-2"></i>Exportar respaldo</button>
+        <button type="button" id="btnRestaurarRespaldo" class="btn btn-agregar px-3"><i class="bi bi-upload me-2"></i>Restaurar respaldo</button>
+        <input type="file" id="archivoRespaldo" accept=".json,application/json" class="d-none" aria-label="Archivo de respaldo">
+      </div>
+      <div id="msgRespaldo" class="aviso d-none mb-0 mt-3" role="status"></div>
+    </section>
+  </main>
+
+  <!-- Confirmacion antes de restaurar un respaldo -->
+  <div class="modal fade" id="modalRestaurar" tabindex="-1" aria-labelledby="tituloModalRestaurar" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h2 class="modal-title fs-6" id="tituloModalRestaurar"><i class="bi bi-exclamation-triangle me-2"></i>¿Reemplazar tus datos actuales?</h2>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+        </div>
+        <div class="modal-body">
+          <div class="aviso aviso-peligro mb-3" role="alert">
+            Al restaurar se <strong>borrarán y reemplazarán</strong> todos tus ingresos, gastos, cuotas y presupuestos actuales.
+            Esta acción no se puede deshacer.
+          </div>
+          <p class="small mb-1"><span class="text-secondary">Datos actuales:</span> <span id="resumenActual"></span></p>
+          <p class="small mb-3"><span class="text-secondary">Datos del respaldo:</span> <span id="resumenArchivo"></span></p>
+          <div class="form-check">
+            <input class="form-check-input" type="checkbox" id="chkDescargarAntes" checked>
+            <label class="form-check-label small" for="chkDescargarAntes">Descargar una copia de mis datos actuales antes de reemplazarlos</label>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-agregar" data-bs-dismiss="modal">Cancelar</button>
+          <button type="button" id="btnConfirmarRestaurar" class="btn btn-danger">Sí, reemplazar mis datos</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
   <script src="nav.js"></script>
-  <script src="consejos.js"></script>
   <script src="app.js"></script>
+  <script src="respaldo.js"></script>
 </body>
 </html>
