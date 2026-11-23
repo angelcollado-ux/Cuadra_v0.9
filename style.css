@@ -163,3 +163,45 @@ body {
 .consejo-hormiga { border-left-color: var(--naranja); } .consejo-hormiga > i { color: var(--naranja); }
 .consejo-info    { border-left-color: var(--azul);    } .consejo-info    > i { color: var(--azul); }
 .consejo-alerta  { border-left-color: #ff6b6b;        } .consejo-alerta  > i { color: #ff6b6b; }
+
+/* graficos circulares */
+html { scroll-behavior: smooth; }
+.grafico-caja { position: relative; height: 260px; }
+@media (min-width: 992px) { .grafico-caja { height: 280px; } }
+.grafico .panel-title { margin-bottom: 0.6rem; }
+
+/* Layout de escritorio */
+main.container { max-width: 1280px; }
+.titulo-seccion { display: none; }                 /* el título ya está en cada gráfico */
+@media (min-width: 992px) { .titulo-seccion { display: block; } }
+
+/* Consejos se reparten en columnas cuando hay espacio */
+#listaConsejos {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 0.6rem;
+}
+#listaConsejos .consejo { margin-bottom: 0; }
+
+/* En celulares los totales son más compactos */
+@media (max-width: 575.98px) {
+  .total .monto { font-size: 1.35rem; }
+}
+
+/* Filas de cuotas se acomodan en 2 líneas si la columna es angosta */
+.fila-cuota { flex-wrap: wrap; }
+.fila-cuota > .fw-medium { min-width: 0; overflow-wrap: anywhere; }
+
+/* Movimientos (ingresos/gastos) y presupuestos */
+.mov-detalle { font-size: 0.75rem; color: var(--texto-suave); }
+.form-select.form-control { background-color: var(--fondo); color: var(--texto); border-color: var(--borde); }
+.progress { background: var(--borde); height: 8px; }
+.fila-pres { padding: 0.7rem 0; border-bottom: 1px solid var(--borde); }
+.fila-pres:last-child { border-bottom: 0; }
+
+/* Paginas de gráficos y consejos */
+.grafico-evolucion { position: relative; height: 320px; }
+.tabla-informe { --bs-table-bg: transparent; --bs-table-color: var(--texto); --bs-table-border-color: var(--borde); }
+#listaConsejos, #listaTips { display: grid; gap: 0.75rem; }
+#listaTips { grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); }
+#listaConsejos .consejo, #listaTips .consejo { margin-bottom: 0; }
